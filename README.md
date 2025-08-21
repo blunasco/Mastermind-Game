@@ -1,13 +1,13 @@
 # 🎮 Mastermind (Flask + SQLAlchemy)
 ---
 
-## 🚀 Quick Start
+## Quick Start
 ```bash
 REQUIREMENTS:
 Python 3.12
 VSCode
 ```
-
+## Please run the following commands on your terminal
 ```bash
 git clone https://github.com/blunasco/Mastermind-Game.git
 cd mastermind-game
@@ -21,7 +21,7 @@ App runs at: `http://127.0.0.1:5000`
 
 ---
 
-## 📡 Endpoints
+## Endpoints
 
 * `POST /start` → create a new game
 * `POST /guess` → submit guesses
@@ -29,27 +29,27 @@ App runs at: `http://127.0.0.1:5000`
 
 ---
 
-## 🛠 Tech
+## Tech
 
 * Backend: Python and Flask
 * DB: SQLAlchemy
 * Migrations: Alembic 
 * Database Tools: DB Browser for SQLite (or SSMS / other DB clients)
 
-## 🛠 Troubleshooting
+## Troubleshooting
 * if local host fails to load: 
-    stop the server
-     clear your browser cookies
-     run the app (python app.py)
+    * stop the server
+    * clear your browser cookies
+    * run the app (python app.py)
 * ModuleError or ImportError: 
-    make sure venv is active (source .venv/bin/activate) 
-    reinstall dependencies (pip install -r requirements.txt)
+    * make sure venv is active (source .venv/bin/activate) 
+    * reinstall dependencies (pip install -r requirements.txt)
 * Database errors(NoReferencedTableError) after adding to models.py:
-    ensure migrations are up to date (flask db migrate -m "") --> (flask db upgrade)
+    * ensure migrations are up to date (flask db migrate -m "") --> (flask db upgrade)
 
 
 
-## 🛠 Rules
+## Rules
 
 * The secret code is 4 digits long
 * Each digit is between 0–7
