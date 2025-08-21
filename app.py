@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from routes.routes import *
+from routes import new_game_bp, guess_bp, end_game_bp
 from models import db #import db from models package
 from werkzeug.exceptions import HTTPException
 from flask_migrate import Migrate

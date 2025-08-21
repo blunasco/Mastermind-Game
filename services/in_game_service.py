@@ -1,5 +1,5 @@
 from flask import jsonify
-from models import db, Game, Guess
+from models import db, Game, Guess, Player
 
 
 class GameSession():
@@ -30,7 +30,7 @@ class GameSession():
                     self.update_rounds()
                     self.update_status(exact_match)
                     self.add_guess(guess,num_match, exact_match)
-                    
+
                     db.session.commit()
 
                 
@@ -100,12 +100,12 @@ class GameSession():
         new_guess = Guess(
             player_id =self.game.player_id,
             game_id = self.game.id,
-            guess_data = self.guess,
-            num_match = self.num_match,
-            exact_match = self.exact_match
+            guess = guess,
+            num_match = num_match,
+            exact_match = exact_match
         )
 
-        db.session(new_guess)
+        db.session.add(new_guess)
         db.session.commit()
 
         return new_guess

@@ -59,7 +59,7 @@
       const res = await fetch("/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ player: name })
+        body: JSON.stringify({ player_name: name })
       });
       document.getElementById("startResult").textContent = await res.text();
     }

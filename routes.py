@@ -18,6 +18,7 @@ def create_new_game():
     data = request.get_json() #reads what client sends, auto parses it into a python dict
     print("DEBUG new game data received:", data)  #this is a python dict
     response = GameInitializer().initialize_game(data) #creates a new GameInitializer object, calls its method, and pass in the request data
+
     return response 
 
 # Play the game (make a guess)

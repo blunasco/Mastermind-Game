@@ -1,6 +1,6 @@
 from flask import Response, jsonify
 import requests, random
-from models import db, Game, Player
+from models import db, Game, Player, Guess
 
 class GameInitializer():
     def __init__(self):
@@ -15,26 +15,11 @@ class GameInitializer():
 
     def initialize_game(self, data) -> Response:
         code = self.set_code()
-
-        # NEW GAME PLAYER LOGIC
-        #get player name from requests data (player: Belle)
-        player_name = data.get("player")
-
-        #if theres no player data from request, require player name
-        if not player_name:
-            return jsonify({"error": "Player name is required."}), 400
         
-        # look up if player exists in db, if player does not exist create player
-        player = Player.query.filter_by(name=player_name).first()
-        if not player:
-            player = Player(name=player_name)
-            db.session.add(player)
-            db.session.commit()
-
         #set the playere of the game and return amsg
-        welcome_msg = self.set_player(player_name)
+        player = self.set_player(data)
 
-        #create a new entry in the Game table
+        #creates game object
         game = Game(
             player=player,#saves as player id
             code=code,
@@ -42,13 +27,13 @@ class GameInitializer():
             #rounds_used = default 0
             status="IN_PROGRESS"
         )
-        #saves the entry to table
+        #saves the entry to table 
         db.session.add(game)
         db.session.commit()
 
         # converts the response form the method into JSON
         return jsonify({
-            "message": welcome_msg,
+            "message": "hello " + player.name + ".",
             "code": code
         })
 
@@ -64,25 +49,33 @@ class GameInitializer():
                 "format": "plain",
                 "rnd": "new"
             }
-            resp = requests.get(url, params=params, timeout=5)
-            resp.raise_for_status()
-            self.code = [int(x) for x in resp.text.strip().split()]
-            print("API code:", self.code)
+            response = requests.get(url, params=params, timeout=5)
+            response.raise_for_status()
+            self.code = [int(num) for num in response.text.strip().split()]
+
+        #if api fails utilize random method for a fall back code
         except Exception as e:
             self.code = [random.randint(0, 7) for _ in range(4)]
-            print("Fallback code:", self.code, "Reason:", e)
 
-        self.rounds_used = 0
-        self.status = "IN_PROGRESS"
-        self.guess_record = []
         return self.code
 
-    def set_player(self,player: str) -> str:
-        self.player= player
+    def set_player(self,data) -> Player:
+        # self.player= player
 
-        return f"Welcome to the game, {player}"
+         #store player data from client (player: Belle)
+        player_name = data.get("player_name")
 
-
+        #if theres no player data entered, require player name
+        if not player_name:
+            return jsonify({"error": "Player name is required."})
         
+        
+        # SQL = SELECT* FROM players, find first instancee
+        player = Player.query.filter_by(name=player_name).first()
 
-
+        #create a player if its not in the db
+        if not player:
+            player = Player(name=player_name)
+            db.session.add(player)
+            db.session.commit()
+        return player
