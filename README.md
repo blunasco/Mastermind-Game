@@ -9,10 +9,10 @@ Python 3.12
 ## Please run the following commands on your terminal
 ```bash
 git clone https://github.com/blunasco/Mastermind-Game.git
-cd mastermind-game
+cd Mastermind-Game
 python -m venv .venv
-source .venv/bin/activate #use for mac/linux only
-.venv\Scripts\activate on Windows #use for windows only
+source .venv/bin/activate  # use for mac/linux only
+.venv\Scripts\activate     # use for windows only
 pip install -r requirements.txt
 python app.py
 ```
