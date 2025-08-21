@@ -5,14 +5,14 @@
 ```bash
 REQUIREMENTS:
 Python 3.12
-VSCode
 ```
 ## Please run the following commands on your terminal
 ```bash
 git clone https://github.com/blunasco/Mastermind-Game.git
 cd mastermind-game
 python -m venv .venv
-source .venv/bin/activate    # or .venv\Scripts\activate on Windows
+source .venv/bin/activate #use for mac/linux only
+.venv\Scripts\activate on Windows #use for windows only
 pip install -r requirements.txt
 python app.py
 ```
