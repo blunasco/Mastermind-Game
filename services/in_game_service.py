@@ -1,5 +1,4 @@
-from flask import jsonify
-from models import db, Game, Guess, Player
+from models import db, Game, Guess
 
 
 class GameSession():
@@ -7,46 +6,38 @@ class GameSession():
         #fetch the game row from db and store eit in self.game
         self.game = Game.query.get(id)
 
-        #validate game
+        #validate if game exists
         if not self.game:
-            raise ValueError ("Game id: {id} not found.")
-        
+            raise ValueError (f"Game id: {id} not found.")
 
     def check_player_guess(self, guess: list):
         try:
             guess = self.validate_guess(guess)
 
-            #validate game
+            #check if game is in progress
             if self.game.status != 'IN_PROGRESS':
                 return 'Try again this game is not in progress!' 
-            
-                
+
             #count matches
             else:
-                    matches = self.count_matches(guess)
-                    exact_match = matches["exact_match"]
-                    num_match = matches['num_match']
-                    #update rounds and status
-                    self.update_rounds()
-                    self.update_status(exact_match)
-                    self.add_guess(guess,num_match, exact_match)
+                exact_match, num_match = self.count_matches(guess)    
+                #update rounds and status
+                self.game.rounds_used += 1
+                self.update_status(exact_match)
+                self.add_guess(guess,num_match, exact_match)
 
-                    db.session.commit()
+                db.session.commit()
 
-                
-            return jsonify({
+            return {
                 "game_id": self.game.id,
                 "exact_match": exact_match,
                 "num_match": num_match,
                 "rounds_used": self.game.rounds_used,
-                "status": self.game.status,
-                "code": self.game.code
-            })
-        
+                "status": self.game.status
+            }
         except ValueError as e:
             return {"error":str(e)} 
 
-#HELPER FUNCTIONS
     def validate_guess(self, guess):
         #validate guesslength
         if len(guess) != len(self.game.code):
@@ -58,12 +49,10 @@ class GameSession():
             if digit < 0 or digit > 7:
                 raise ValueError("Each digit must be between 0 and 7.")
         return guess
-     
-    
-    def count_matches(self, guess: list) -> tuple[int, int]:
+
+    def count_matches(self, guess: list):
         code = self.game.code
         exact_match = 0
-
         code_counts = {}
         guess_counts = {}
 
@@ -80,14 +69,9 @@ class GameSession():
             if num in code_counts:
                 num_match += min(code_counts[num], guess_counts[num])
 
-        return {
-            "exact_match": exact_match,
-            "num_match": num_match
-        }
-    def update_rounds(self):
-        self.game.rounds_used += 1
+        return  exact_match, num_match 
 
-    def update_status (self, exact_match:int) -> str:
+    def update_status (self, exact_match:int):
         if exact_match == 4:
             self.game.status = 'WON'
         elif self.game.rounds_used >= self.game.rounds_allowed:
@@ -95,7 +79,7 @@ class GameSession():
         else: 
             self.game.status ='IN_PROGRESS'
         return self.game.status        
-    
+
     def add_guess (self, guess, exact_match, num_match):
         new_guess = Guess(
             player_id =self.game.player_id,
@@ -107,5 +91,4 @@ class GameSession():
 
         db.session.add(new_guess)
         db.session.commit()
-
         return new_guess

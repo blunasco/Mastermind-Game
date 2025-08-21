@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 from routes import new_game_bp, guess_bp, end_game_bp
 from models import db #import db from models package
 from werkzeug.exceptions import HTTPException
@@ -25,11 +25,15 @@ def create_app():
     #auto creates tables when app is first ran
     with app.app_context():  
         db.create_all()
-        # log all errors
 
+    # log all errors
     @app.errorhandler(HTTPException)
     def handle_exception(e):  # noqa: F401
-     return jsonify(error=str(e), description=e.description), e.code
+     return jsonify({
+            "error": e.name,
+            "message": e.description,
+            "status_code": e.code
+        }), e.code
 
     # Home route (renders frontend)
     @app.route("/")
@@ -38,10 +42,6 @@ def create_app():
 
     return app
 
-
 if __name__== "__main__":
     app = create_app()
     app.run(debug=True)
-
-
-

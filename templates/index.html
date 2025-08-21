@@ -53,50 +53,84 @@
     </div>
   </div>
 
-  <script>
-    async function startGame() {
-      const name = document.getElementById("playerName").value;
-      const res = await fetch("/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ player_name: name })
-      });
-      document.getElementById("startResult").textContent = await res.text();
-    }
+<script>
+  async function startGame() {
+    const name = document.getElementById("playerName").value;
+    const res = await fetch("/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ player_name: name })
+    });
 
-    async function makeGuess() {
+    const text = await res.text();
+    let output;
+    try {
+      const data = JSON.parse(text);
+      output = JSON.stringify(data, null, 2);
+    } catch {
+      // fallback: just show the text (ValueError traceback HTML)
+      output = extractErrorMessage(text);
+    }
+    document.getElementById("startResult").textContent = output;
+  }
+
+  async function makeGuess() {
     const id = document.getElementById("gameId").value;
     let rawGuess = document.getElementById("guess").value.trim();
 
     let guess;
     if (rawGuess.includes(",")) {
-        // Case 1: "1,2,3,4"
-        guess = rawGuess.split(",").map(x => parseInt(x.trim()));
+      guess = rawGuess.split(",").map(x => parseInt(x.trim()));
     } else {
-        // Case 2: "1234"
-        guess = rawGuess.split("").map(x => parseInt(x));
+      guess = rawGuess.split("").map(x => parseInt(x));
     }
 
     const res = await fetch("/guess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, guess })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, guess })
     });
 
-    document.getElementById("guessResult").textContent = await res.text();
+    const text = await res.text();
+    let output;
+    try {
+      const data = JSON.parse(text);
+      output = JSON.stringify(data, null, 2);
+    } catch {
+      output = extractErrorMessage(text);
     }
-    async function endGame() {
-      const id = document.getElementById("endGameId").value;
+    document.getElementById("guessResult").textContent = output;
+  }
 
-      const res = await fetch("/end", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id })   // backend expects {"id": ...}
-      });
+  async function endGame() {
+    const id = document.getElementById("endGameId").value;
 
-      const text = await res.text();
-      document.getElementById("endResult").textContent = text;
+    const res = await fetch("/end", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id })
+    });
+
+    const text = await res.text();
+    let output;
+    try {
+      const data = JSON.parse(text);
+      output = JSON.stringify(data, null, 2);
+    } catch {
+      output = extractErrorMessage(text);
     }
-  </script>
+    document.getElementById("endResult").textContent = output;
+  }
+
+  // helper: try to pull just the ValueError message out of the debugger HTML
+  function extractErrorMessage(htmlText) {
+    const match = htmlText.match(/ValueError: ([^<]+)/);
+    if (match) {
+      return `${match[1].trim()}`;
+    }
+    return `Unexpected error:\n${htmlText}`;
+  }
+</script>
+
 </body>
 </html>

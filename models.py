@@ -1,6 +1,4 @@
-
 from sqlalchemy import JSON
-from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
 # create db once
@@ -16,7 +14,6 @@ class Game(db.Model):
     player = db.relationship("Player", back_populates="games")
     guesses = db.relationship("Guess", back_populates="game")
 
-   
 class Guess(db.Model):
     __tablename__="guesses"
     id = db.Column(db.Integer, primary_key =True)
@@ -35,5 +32,3 @@ class Player(db.Model):
     gender = db.Column(db.String)
     games = db.relationship("Game", back_populates="player", cascade="all, delete-orphan")
     guesses = db.relationship("Guess", back_populates="player")
-
-

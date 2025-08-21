@@ -1,38 +1,41 @@
-from flask import jsonify
-from models import db, Game, Guess
+from models import Game, Guess
+
 
 class GameResult:
-    def __init__(self, game_id:int):
+
+    def end_game(self, data):
+
         #fetch the game row from db and store eit in self.game
-        self.game = Game.query.get(game_id)
+        id = data.get("id")
+        self.game = Game.query.get(id)
 
         #validate game
         if not self.game:
-            raise ValueError ("Game id: {id} not found.")
-    def end_game(self, id:int, guesses):
-        self.gather_results(id)
+            raise ValueError (f"Game id: {id} not found.")
 
-        return jsonify ({
+        guesses, message = self.gather_results()
+       
+        return {
             "status": self.game.status,
             "rounds_used": self.game.rounds_used,
-            "code": self.game.code,
             "guesses": guesses,
-            "message": self.gather_results(self.game.status)})
+            "message": message
+        }
 
-    def gather_results(self, status):
-        game_id = self.game.game_id
-        guesses = Guess.query.filter_by(game_id=self.game.game_id).all
+    def gather_results(self):
+        guesses = Guess.query.filter_by(game_id=self.game.id).all()
+
+        guess_list = []
+        for guess in guesses:
+            guess_list.append({
+                "guess": guess.guess,       
+            })
 
         if self.game.status == 'WON':
             message =  "Congratulations, you won!"
-        if self.game.status == 'LOST':
+        elif self.game.status == 'LOST':
             message ="Better luck next time!"
         else:
             message = "Game in progress."
 
-        return {"guesses": guesses,
-            "message": message }
-
-
-
-        
+        return  guess_list, message

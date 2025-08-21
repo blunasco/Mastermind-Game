@@ -1,6 +1,7 @@
-from flask import Response, jsonify
+from flask import jsonify
 import requests, random
-from models import db, Game, Player, Guess
+from models import db, Game, Player
+
 
 class GameInitializer():
     def __init__(self):
@@ -10,12 +11,10 @@ class GameInitializer():
         self.rounds_used = 0
         self.status = "NOT_STARTED"
         self.guess_record = []
-   
-    from models import db, Game, Player
 
-    def initialize_game(self, data) -> Response:
+    def initialize_game(self, data):
         code = self.set_code()
-        
+
         #set the playere of the game and return amsg
         player = self.set_player(data)
 
@@ -23,8 +22,6 @@ class GameInitializer():
         game = Game(
             player=player,#saves as player id
             code=code,
-            #rounds_allowed = default 10
-            #rounds_used = default 0
             status="IN_PROGRESS"
         )
         #saves the entry to table 
@@ -32,12 +29,12 @@ class GameInitializer():
         db.session.commit()
 
         # converts the response form the method into JSON
-        return jsonify({
-            "message": "hello " + player.name + ".",
-            "code": code
-        })
+        return {
+            "message": "Hello, " + player.name + ".",
+            "game id": game.id
+        }
 
-    def set_code(self) -> list:
+    def set_code(self):
         try:
             url = "https://www.random.org/integers/"
             params = {
@@ -59,17 +56,14 @@ class GameInitializer():
 
         return self.code
 
-    def set_player(self,data) -> Player:
-        # self.player= player
-
-         #store player data from client (player: Belle)
+    def set_player(self, data):
+        #store player data from client (player: Belle)
         player_name = data.get("player_name")
 
         #if theres no player data entered, require player name
         if not player_name:
             return jsonify({"error": "Player name is required."})
-        
-        
+
         # SQL = SELECT* FROM players, find first instancee
         player = Player.query.filter_by(name=player_name).first()
 
